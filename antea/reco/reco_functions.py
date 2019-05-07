@@ -52,6 +52,30 @@ def find_closest_sipm(x, y, z, sens_pos, sns_over_thr, charges_over_thr):
     return min_sns
 
 
+def sensor_position(h5in):
+    """A dictionary that stores the position of all the sensors
+    in cartesian coordinates is created.
+    """
+    sipms    = h5in.root.MC.sensor_positions[:]
+    sens_pos = {}
+    for sipm in sipms:
+        sens_pos[sipm[0]] = (sipm[1], sipm[2], sipm[3])
+    return sens_pos
+
+
+def sensor_position_cyl(h5in):
+    """A dictionary that stores the position of all the sensors
+    in cylindrical coordinates is created.
+    """
+    sipms        = h5in.root.MC.sensor_positions[:]
+    sens_pos_cyl = {}
+    for sipm in sipms:
+        sens_pos_cyl[sipm[0]] = (np.sqrt(sipm[1]*sipm[1] + sipm[2]*sipm[2]),
+                                 np.arctan2(sipm[2], sipm[1]),
+                                 sipm[3])
+    return sens_pos_cyl
+
+
 def sensors_info(ave_true, sens_pos, sens_pos_cyl, sns_over_thr, charges_over_thr):
 
     """For a given true position of an event, returns all the information of the sensors
