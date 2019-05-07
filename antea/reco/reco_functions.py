@@ -36,3 +36,17 @@ def true_photoelect(h5in, true_file, evt, compton=False):
                     if mother.p[1] > 0.: ave_true1 = get_true_pos(part)
                     else:                ave_true2 = get_true_pos(part)
     return ave_true1, ave_true2
+
+
+def find_closest_sipm(x, y, z, sens_pos, sns_over_thr, charges_over_thr):
+    """Returns the sensor ID of the closest sipm to the given true event
+    """
+    min_dist = 1.e9
+    min_sns  = 0
+    for sns_id, charge in zip(sns_over_thr, charges_over_thr):
+        pos  = sens_pos[sns_id]
+        dist = np.linalg.norm(np.subtract((x, y, z), pos))
+        if dist < min_dist:
+            min_dist = dist
+            min_sns  = sns_id
+    return min_sns
