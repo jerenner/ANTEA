@@ -15,6 +15,10 @@ def get_true_pos(part):
 
 
 def true_photoelect(h5in, true_file, evt, compton=False):
+    """Returns the position of the true photoelectric energy deposition
+    calculated with barycenter algorithm.
+    It allows the possibility of including compton events.
+    """
 
     this_event_dict = read_mcinfo        (     h5in, (evt, evt+1))
     this_event_wvf  = read_mcsns_response(true_file, (evt, evt+1))
