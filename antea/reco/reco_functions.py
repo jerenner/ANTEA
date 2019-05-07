@@ -50,3 +50,58 @@ def find_closest_sipm(x, y, z, sens_pos, sns_over_thr, charges_over_thr):
             min_dist = dist
             min_sns  = sns_id
     return min_sns
+
+
+def sensors_info(ave_true, sens_pos, sens_pos_cyl, sns_over_thr, charges_over_thr):
+
+    """For a given true position of an event, returns all the information of the sensors
+    for the corresponding half of the ring.
+
+    Parameters
+    ----------
+    ave_true         : np.array
+    Position of the true hits (cart coordinates).
+    sens_pos         : dict
+    Contains the position of each sensor (cart coordinates).
+    sens_pos_cyl     : dict
+    Contains the position of each sensor (cyl coordinates).
+    sns_over_thr     : np.array
+    IDs of the sensors that detected charge above a certain threshold.
+    charges_over_thr : np.array
+    Charges of the sensors above a certain threshold
+
+    Returns
+    -------
+    ampl1    : int
+    Total charge detected for this single event.
+    count1   : int
+    Number of sensors that detected charge.
+    pos1     : np.array
+    Position of every sensor that detected some charge (cart coordinates).
+    pos1_cyl : np.array
+    Position of every sensor that detected some charge (cyl coordinates).
+    q1       : np.array
+    Charge detected by every sensor.
+    """
+
+    closest = ats.find_closest_sipm(ave_true[0], ave_true[1], ave_true[2],
+                                    sens_pos, sns_over_thr, charges_over_thr)
+
+    ampl1  = 0
+    count1 = 0
+    pos1   = []
+    q1     = []
+
+    for sns_id, charge in zip(sns_over_thr, charges_over_thr):
+        pos         = sens_pos    [sns_id]
+        pos_cyl     = sens_pos_cyl[sns_id]
+        pos_closest = sens_pos    [closest]
+        scalar_prod = sum(a*b for a, b in zip(pos, pos_closest))
+        if scalar_prod > 0.:
+            pos1    .append(pos)
+            pos1_cyl.append(pos_cyl)
+            q1      .append(charge)
+            ampl1   += charge
+            count1  += 1
+
+return ampl1, count1, pos1, pos1_cyl, q1
