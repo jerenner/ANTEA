@@ -108,8 +108,8 @@ def sensors_info(ave_true, sens_pos, sens_pos_cyl, sns_over_thr, charges_over_th
     Charge detected by every sensor.
     """
 
-    closest = ats.find_closest_sipm(ave_true[0], ave_true[1], ave_true[2],
-                                    sens_pos, sns_over_thr, charges_over_thr)
+    closest = find_closest_sipm(ave_true[0], ave_true[1], ave_true[2],
+                                sens_pos, sns_over_thr, charges_over_thr)
 
     ampl1  = 0
     count1 = 0
@@ -128,4 +128,12 @@ def sensors_info(ave_true, sens_pos, sens_pos_cyl, sns_over_thr, charges_over_th
             ampl1   += charge
             count1  += 1
 
-return ampl1, count1, pos1, pos1_cyl, q1
+    return ampl1, count1, pos1, pos1_cyl, q1
+
+
+def get_reco_r_and_var_phi(ave_true, cyl_pos, q):
+    r        = np.sqrt(ave_true[0]**2 + ave_true[1]**2)
+    phi_pos  = np.array([el[1] for el in cyl_pos])
+    mean_phi = np.average(phi_pos, weights=q)
+    var_phi  = np.average((phi_pos - mean_phi)**2, weights=q)
+    return r, var_phi
