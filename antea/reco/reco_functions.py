@@ -14,34 +14,6 @@ def get_true_pos(part):
     else: raise NoHits
 
 
-def true_photoelect(h5in, true_file, evt, compton=False):
-    """Returns the position of the true photoelectric energy deposition
-    calculated with barycenter algorithm.
-    It allows the possibility of including compton events.
-    """
-
-    this_event_dict = read_mcinfo        (     h5in, (evt, evt+1))
-    this_event_wvf  = read_mcsns_response(true_file, (evt, evt+1))
-    part_dict       = list(this_event_dict.values())[0]
-
-    ave_true1 = []
-    ave_true2 = []
-
-    for indx, part in part_dict.items():
-        if part.name == 'e-' :
-            mother = part_dict[part.mother_indx]
-            if part.initial_volume == 'ACTIVE' and part.final_volume == 'ACTIVE':
-                if mother.primary and np.isclose(mother.E*1000., 510.999, atol=1.e-3):
-                    if compton==True: pass
-                    else:
-                        if np.isclose(sum(h.E for h in part.hits), 0.476443, atol=1.e-6): pass
-                        else: continue
-
-                    if mother.p[1] > 0.: ave_true1 = get_true_pos(part)
-                    else:                ave_true2 = get_true_pos(part)
-    return ave_true1, ave_true2
-
-
 def find_closest_sipm(x, y, z, sens_pos, sns_over_thr, charges_over_thr):
     """Returns the sensor ID of the closest sipm to the given true event
     """
