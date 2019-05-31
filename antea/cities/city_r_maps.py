@@ -1,9 +1,10 @@
 
 import tables as tb
-import reco_functions as rf
-from components import part_wfs_from_files
-from components import true_photoelect
-from components import wvf_passing_filter
+import antea.reco.reco_functions as rf
+
+from antea.cities.components import part_wfs_from_files
+from antea.cities.components import true_photoelect
+from antea.cities.components import wvf_passing_filter
 
 from invisible_cities.reco                import tbl_functions as tbl
 from invisible_cities.dataflow            import dataflow      as fl
@@ -17,28 +18,25 @@ from invisible_cities.cities.components import compute_xy_position
 
 
 @city
-def city_r_maps(files_in, file_out, compression, event_range, print_mod):
-
-    #sens_pos       = rf.sensor_position    (h5in)
-    #sens_pos_cyl   = rf.sensor_position_cyl(h5in)
+def city_r_maps(files_in, file_out, compression, event_range, print_mod,
+                nsteps, th_start):
 
     true_phot = fl.map(true_photoelect(compton=False),
                        args="particles",
-                       out=("true_pos1", "true_pos2"))
+                       out=("ave_true1", "ave_true2"))
 
     wvf_pass_filter = fl.map(wvf_passing_filter(nsteps, th_start),
-                   args=("wfs", "true_pos1", "true_pos2", "sens_pos", "sens_pos_cyl"),
-                   out=("region1_info", "region2_info"))
-
+                   args=("wfs", "ave_true1", "ave_true2", "sens_pos", "sens_pos_cyl"),
+                   out=("true_r1", "true_r2", "var_phi1", "var_phi2"))
 
     event_count_in        = fl.spy_count()
     event_count_out       = fl.spy_count()
 
     with tb.open_file(file_out, "w", filters = tbl.filters(compression)) as h5out:
 
-        write_event_info      = fl.sink(run_and_event_writer(h5out                ), args=("run_number", "event_number", "timestamp"))
+        write_event_info      = fl.sink(run_and_event_writer(h5out), args=("run_number", "event_number", "timestamp"))
 
-        return push(source = part_wfs_from_files(files_in), ,
+        return push(source = part_wfs_from_files(files_in),
                     pipe   = pipe(
                         fl.slice(*event_range, close_all=True),
                         print_every(print_mod)                ,
