@@ -378,7 +378,7 @@ def select_coincidences(sns_response: pd.DataFrame, tof_response: pd.DataFrame,
     return pos1, pos2, q1, q2, true_pos1, true_pos2, true_t1, true_t2
 
 
-def select_coincidences_trueinfo(charge_range: Tuple[float, float],
+def select_coincidences_trueinfo(energy_range: Tuple[float, float],
                                  particles: pd.DataFrame,
                                  hits: pd.DataFrame)-> Tuple[Tuple[float, float, float],
                                                              Tuple[float, float, float],
@@ -391,7 +391,7 @@ def select_coincidences_trueinfo(charge_range: Tuple[float, float],
 
     # Select based on true total energy since we don't have SiPM charges.
     etotal = hits.energy.sum()
-    sel1 = (etotal > charge_range[0]) & (etotal < charge_range[1])
+    sel1 = (etotal > energy_range[0]) & (etotal < energy_range[1])
     if not sel1:
         return None, None, None, None, 0., 0.
 
