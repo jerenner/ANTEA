@@ -378,6 +378,46 @@ def select_coincidences(sns_response: pd.DataFrame, tof_response: pd.DataFrame,
     return pos1, pos2, q1, q2, true_pos1, true_pos2, true_t1, true_t2
 
 
+def select_coincidences_trueinfo(charge_range: Tuple[float, float],
+                                 particles: pd.DataFrame,
+                                 hits: pd.DataFrame)-> Tuple[Tuple[float, float, float],
+                                                             Tuple[float, float, float],
+                                                             Tuple[float, float, float],
+                                                             Tuple[float, float, float],
+                                                             float, float]:
+    """
+    Selects coincidences using only true info.
+    """
+
+    # Select based on true total energy since we don't have SiPM charges.
+    etotal = hits.energy.sum()
+    sel1 = (etotal > charge_range[0]) & (etotal < charge_range[1])
+    if not sel1:
+        return None, None, None, None, 0., 0.
+
+    # Get the location of the initial vertex.
+    primaries = particles[particles.primary == True]
+    if(len(primaries) != 2):
+        print("Two primaries not found for this event.")
+        return None, None, None, None, 0., 0.
+    xi1 = primaries.initial_x.values[0]; yi1 = primaries.initial_y.values[0]; zi1 = primaries.initial_z.values[0]
+    xi2 = primaries.initial_x.values[1]; yi2 = primaries.initial_y.values[1]; zi2 = primaries.initial_z.values[1]
+
+    if(xi1 != xi2 or yi1 != yi2 or zi1 != zi2):
+        print("Primaries do not share the same vertex for this event")
+
+    v1 = np.array([xi1, yi1, zi1])
+    v2 = np.array([xi2, yi2, zi2])
+
+    # Get the true interaction points.
+    true_pos1, true_pos2, true_t1, true_t2, _, _ = find_first_interactions_in_active(particles, hits)
+
+    if(len(true_pos1) < 3 and len(true_pos2) < 3):
+        return None, None, None, None, 0., 0.
+
+    return v1, v2, true_pos1, true_pos2, true_t1, true_t2
+
+
 def find_first_times_of_coincidences(sns_response: pd.DataFrame,
                                      tof_response: pd.DataFrame,
                                      charge_range: Tuple[float, float],
